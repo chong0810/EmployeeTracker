@@ -4,3 +4,5 @@ var Employee = function (first_name, last_name, role_id, manager_id) {
     this.role_id = role_id;
     this.manager_id = manager_id;
 }
+
+module.exports = Employee;
