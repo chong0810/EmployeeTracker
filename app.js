@@ -15,10 +15,6 @@ connection.connect(function (err) {
   questions();
 });
 
-function addQuestions() {
-  inquirer;
-}
-
 function questions() {
   inquirer
     .prompt({
@@ -35,7 +31,7 @@ function questions() {
         "Delete Employee",
         "Update Employee Role",
         "Update Employee Manager",
-        "Exit"
+        "Exit",
       ],
     })
     .then(function (answer) {
@@ -72,68 +68,69 @@ function questions() {
           break;
 
         case "Exit":
-            break;
+          break;
       }
     });
 }
 
 function viewAll() {
-    connection.query(`SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
+  connection.query(
+    `SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
     FROM employee_trackerDB.employee
     INNER JOIN role ON employee.role_id = role.id
     INNER JOIN department ON role.department_id = department.id`,
 
     function (err, res) {
-        if (err) 
-        throw err;
+      if (err) throw err;
 
-        console.table(res);
-        questions();
-    });
+      console.table(res);
+      questions();
+    }
+  );
 }
 
 function viewAllDepartment() {
+  
 
-    var array = [];
-
-    connection.query('SELECT department.name FROM employee_trackerDB.department',
+  connection.query(
+    "SELECT department.name FROM employee_trackerDB.department",
     function (err, res) {
+      if (err) throw err;
 
-        if(err) 
-        throw err;
-
+      inquirer.prompt([
+        {
+          name: "choice",
+          type: "list",
+          choices: function () {
+            var choiceArray = [];
+            for (var i = 0; i < res.length; i++) {
+              choiceArray.push(res[i].name);
+            }
+            return choiceArray;
+          },
+          message: "Which Department?",
+        }
         
-        console.log(res);
+      ]).then(function (answer) {
+          console.log(answer);
+          console.log(answer.choice)
+         
+        connection.query(
+          `SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
+      FROM employee_trackerDB.employee
+      INNER JOIN role ON employee.role_id = role.id
+      INNER JOIN department ON role.department_id = department.id
+      WHERE department.name LIKE "${answer.choice}"`,
+          function (err, res) {
+            if (err) throw err;
+  
+            console.table(res);
+            questions();
+          }
+        );
+      });
+    }
+  );
 
 
-    });
-
-
-
-    inquirer.prompt({
-        name: "department",
-        type: "input",
-        message: "What department?",
-
-    }).then(function(answer) {
-        connection.query(`SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
-    FROM employee_trackerDB.employee
-    INNER JOIN role ON employee.role_id = role.id
-    INNER JOIN department ON role.department_id = department.id
-    WHERE department.name LIKE '${answer.department}`
-    ,
-
-
-    function (err, res) {
-        if (err) 
-        throw err;
-
-        console.table(res);
-        questions();
-    });
-    });
-
-
-
-    
 }
