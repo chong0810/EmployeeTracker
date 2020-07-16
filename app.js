@@ -263,64 +263,133 @@ function createRole() {
 }
 
 function addEmployee() {
+  connection.query(
+    "SELECT role.title, role.id FROM employee_trackerDB.role",
+    function (err, res) {
+      if (err) throw err;
 
-    connection.query("SELECT role.title, role.id FROM employee_trackerDB.role", function (
-        err,
-        res
-      ) {
-        if (err) throw err;
-    
-        inquirer
-          .prompt([
-            {
-                name: "first_name",
-                type: "input",
-                message: "What is the first name?",
-              },
-              {
-                name: "last_name",
-                type: "input",
-                message: "What is the last name?",
-              },
-            {
-              name: "choice",
-              type: "list",
-              choices: function () {
-                var choiceArray = [];
-                for (var i = 0; i < res.length; i++) {
-                  choiceArray.push(res[i].title);
-                }
-                return choiceArray;
-              },
-              message: "Which Role?",
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].title);
+              }
+              return choiceArray;
             },
-          ])
-          .then(function (answer) {
-            console.log(answer);
-            console.log(answer.choice);
+            message: "Which Role?",
+          },
+        ])
+        .then(function (answer) {
+          console.log(answer);
+          console.log(answer.choice);
 
-            var role_id = answer.choice;
+          var role_id = answer.choice;
+
+          for (var i = 0; i < res.length; i++) {
+            if (res[i].title === answer.choice) {
+              role_id = res[i].id;
+              console.log(role_id);
+            }
+          }
+
+          connection.query(
+            "INSERT INTO employee SET ?",
+            {
+              first_name: answer.first_name,
+              last_name: answer.last_name,
+              role_id: role_id,
+            },
+            function (err) {
+              if (err) throw err;
+
+              questions();
+            }
+          );
+        });
+    }
+  );
+}
+
+
+function updateEmployee() {
+
+connection.query(
+    `SELECT employee.first_name, employee.last_name, employee.id, role.title, role.id
+    FROM employee_trackerDB.employee JOIN employee_trackerDB.role`,
+
+    function(err,res) {
+        if (err) throw err;
+         console.log(res);
+        inquirer
+        .prompt([
+          {
+            name: "employeeChoice",
+            type: "list",
+            choices: function () {
+              var choiceArray1 = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray1.push(`${res[i].first_name} ${res[i].last_name}`);
+              }
+              return choiceArray1;
+            },
+            message: "Which employee do you want to change?",
+          },
+
+          {
+            name: "roleChoice",
+            type: "list",
+            choices: function () {
+              var choiceArray2 = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray2.push(res[i].title);
+              }
+              return choiceArray2;
+            },
+            message: "Which Role do you want to apply to the employee?",
+          }
+        ]).then(function(answer) {
+
+
+            var role_id, employeeId;
 
             for (var i = 0; i < res.length; i++) {
-              if (res[i].title === answer.choice) {
-                role_id = res[i].id;
-                console.log(role_id);
-              }
+                if (res[i].title === answer.choice) {
+                  role_id = res[i].id;
+                  console.log(role_id);
+                } 
             }
-    
+
+            for (var i = 0; i < res.length; i++) {
+                if (`${res[i].first_name} ${res[i].last_name}` === answer.choiceArray1) {
+                  employeeId = res[i].id;
+                  console.log(employeeId);
+                } 
+            }
+
+
             connection.query(
-                "INSERT INTO employee SET ?",
-                {
-                  first_name: answer.first_name,
-                  last_name: answer.last_name,
-                  role_id: role_id,
-                },
+                "UPDATE employee SET ? WHERE ?",
+                [
+                    {
+                        role_id: role_id
+                    },
+
+                    {
+                        id: id
+                    },
+                ],
                 function (err) {
                   if (err) throw err;
     
                   questions();
                 }
               );
-          });
-      });
+        });
+    }
+);
+
 }
