@@ -18,7 +18,7 @@ connection.connect(function (err) {
   questions();
 });
 
-// questions
+// questions for the user
 function questions() {
   inquirer
     .prompt({
@@ -29,15 +29,16 @@ function questions() {
         "View All Employees",
         "View All Employees by Department",
         "View All Employees by Role",
-        "Create Department",
-        "Create Role",
-        "Add Employee",
-        "Delete Employee",
+        "Create a Department",
+        "Create a Role",
+        "Add an Employee",
+        // "Delete Employee",
         "Update Employee Role",
-        "Update Employee Manager",
+        // "Update Employee Manager",
         "Exit",
       ],
     })
+    // Switch Case for each option
     .then(function (answer) {
       switch (answer.action) {
         case "View All Employees":
@@ -72,6 +73,7 @@ function questions() {
           break;
 
         case "Exit":
+          connection.end();
           break;
       }
     });
@@ -366,8 +368,10 @@ function updateEmployee() {
         .then(function (answer) {
           console.log(answer);
 
+          // variables for update 
           var role_id, employeeId;
 
+          // searching and matching for name
           connection.query(
             `SELECT employee.first_name, employee.last_name, employee.id
             FROM employee_trackerDB.employee`,
@@ -383,7 +387,7 @@ function updateEmployee() {
                   employeeId = res2[i].id;
                 }
               }
-
+              // searching and matching for title
               connection.query(
                 `SELECT role.title, role.salary, role.id
               FROM employee_trackerDB.role`,
