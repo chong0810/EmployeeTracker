@@ -90,47 +90,87 @@ function viewAll() {
 }
 
 function viewAllDepartment() {
-  
-
   connection.query(
     "SELECT department.name FROM employee_trackerDB.department",
     function (err, res) {
       if (err) throw err;
 
-      inquirer.prompt([
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].name);
+              }
+              return choiceArray;
+            },
+            message: "Which Department?",
+          },
+        ])
+        .then(function (answer) {
+          console.log(answer);
+          console.log(answer.choice);
+
+          connection.query(
+            `SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
+      FROM employee_trackerDB.employee
+      INNER JOIN role ON employee.role_id = role.id
+      INNER JOIN department ON role.department_id = department.id
+      WHERE department.name LIKE "${answer.choice}"`,
+            function (err, res) {
+              if (err) throw err;
+
+              console.table(res);
+              questions();
+            }
+          );
+        });
+    }
+  );
+}
+
+function viewAllRole() {
+  connection.query("SELECT role.title FROM employee_trackerDB.role", function (
+    err,
+    res
+  ) {
+    if (err) throw err;
+
+    inquirer
+      .prompt([
         {
           name: "choice",
           type: "list",
           choices: function () {
             var choiceArray = [];
             for (var i = 0; i < res.length; i++) {
-              choiceArray.push(res[i].name);
+              choiceArray.push(res[i].title);
             }
             return choiceArray;
           },
-          message: "Which Department?",
-        }
-        
-      ]).then(function (answer) {
-          console.log(answer);
-          console.log(answer.choice)
-         
+          message: "Which Role?",
+        },
+      ])
+      .then(function (answer) {
+        console.log(answer);
+        console.log(answer.choice);
+
         connection.query(
           `SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
-      FROM employee_trackerDB.employee
-      INNER JOIN role ON employee.role_id = role.id
-      INNER JOIN department ON role.department_id = department.id
-      WHERE department.name LIKE "${answer.choice}"`,
+        FROM employee_trackerDB.employee
+        INNER JOIN role ON employee.role_id = role.id
+        INNER JOIN department ON role.department_id = department.id
+        WHERE role.title LIKE "${answer.choice}"`,
           function (err, res) {
             if (err) throw err;
-  
+
             console.table(res);
             questions();
           }
         );
       });
-    }
-  );
-
-
+  });
 }
