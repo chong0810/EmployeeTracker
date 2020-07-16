@@ -1,6 +1,8 @@
+// dependencies
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
+// connecting to mysql
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -9,12 +11,14 @@ var connection = mysql.createConnection({
   database: "employee_trackerDB",
 });
 
+// application starter
 connection.connect(function (err) {
   if (err) throw err;
 
   questions();
 });
 
+// questions
 function questions() {
   inquirer
     .prompt({
@@ -73,6 +77,7 @@ function questions() {
     });
 }
 
+// view all employees
 function viewAll() {
   connection.query(
     `SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name as "Department Name"
@@ -89,6 +94,7 @@ function viewAll() {
   );
 }
 
+// view all employees by department
 function viewAllDepartment() {
   connection.query(
     "SELECT department.name FROM employee_trackerDB.department",
@@ -132,6 +138,7 @@ function viewAllDepartment() {
   );
 }
 
+// view all employees by role
 function viewAllRole() {
   connection.query("SELECT role.title FROM employee_trackerDB.role", function (
     err,
@@ -175,6 +182,7 @@ function viewAllRole() {
   });
 }
 
+// create a department
 function createDep() {
   // prompt for info about the item being put up for auction
   inquirer
@@ -201,6 +209,7 @@ function createDep() {
     });
 }
 
+// create a role
 function createRole() {
   connection.query(
     "SELECT department.name, department.id FROM employee_trackerDB.department",
@@ -262,6 +271,7 @@ function createRole() {
   );
 }
 
+// add an employee
 function addEmployee() {
   connection.query(
     "SELECT role.title, role.id FROM employee_trackerDB.role",
@@ -314,12 +324,14 @@ function addEmployee() {
   );
 }
 
-
+// update employee role
 function updateEmployee() {
 
 connection.query(
-    `SELECT employee.first_name, employee.last_name, employee.id, role.title, role.id
-    FROM employee_trackerDB.employee JOIN employee_trackerDB.role`,
+    `SELECT employee.first_name, employee.last_name, role.salary, role.title, role.id, department.name as "Department Name"
+    FROM employee_trackerDB.employee
+    INNER JOIN role ON employee.role_id = role.id
+    INNER JOIN department ON role.department_id = department.id`,
 
     function(err,res) {
         if (err) throw err;
@@ -351,27 +363,42 @@ connection.query(
             },
             message: "Which Role do you want to apply to the employee?",
           }
-        ]).then(function(answer) {
+        ])
+        .then(function(answer) {
 
+          console.log(answer);
 
             var role_id, employeeId;
 
-            for (var i = 0; i < res.length; i++) {
-                if (res[i].title === answer.choice) {
-                  role_id = res[i].id;
-                  console.log(role_id);
+          connection.query(
+            `SELECT employee.first_name, employee.last_name, employee.id
+            FROM employee_trackerDB.employee`,
+
+            function(err,res2) {
+              if (err) throw err;
+
+              for (var i = 0; i < res2.length; i++) {
+                if (`${res2[i].first_name} ${res2[i].last_name}` === answer.employeeChoice) {
+                  employeeId = res2[i].id;
+                  
                 } 
             }
-
-            for (var i = 0; i < res.length; i++) {
-                if (`${res[i].first_name} ${res[i].last_name}` === answer.choiceArray1) {
-                  employeeId = res[i].id;
-                  console.log(employeeId);
-                } 
-            }
-
 
             connection.query(
+              `SELECT role.title, role.salary, role.id
+              FROM employee_trackerDB.role`,
+  
+              function(err,res3) {
+                if (err) throw err;
+  
+                for (var i = 0; i < res2.length; i++) {
+                  if (`${res3[i].title}`=== answer.roleChoice) {
+                    role_id = res3[i].id;
+                    
+                  } 
+              }
+
+              connection.query(
                 "UPDATE employee SET ? WHERE ?",
                 [
                     {
@@ -379,15 +406,31 @@ connection.query(
                     },
 
                     {
-                        id: id
+                        id: employeeId
                     },
                 ],
                 function (err) {
                   if (err) throw err;
-    
+                  console.log("Employee role has been changed.")
                   questions();
                 }
               );
+
+
+              
+                
+              
+  
+  
+              }
+            );
+              
+            
+
+
+            }
+          );
+          
         });
     }
 );

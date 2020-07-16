@@ -24,6 +24,7 @@ department_id INT NOT NULL,
 FOREIGN KEY (department_id) REFERENCES department (id)
 );
 
+-- Creating employee table
 CREATE TABLE employee (
 
 id INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY,
