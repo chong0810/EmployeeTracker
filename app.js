@@ -174,3 +174,64 @@ function viewAllRole() {
       });
   });
 }
+
+function createDep() {
+    // prompt for info about the item being put up for auction
+    inquirer
+      .prompt([
+        {
+          name: "name",
+          type: "input",
+          message: "What is the department name?",
+        }
+      ])
+      .then(function (answer) {
+        // when finished prompting, insert a new item into the db with that info
+        connection.query(
+          "INSERT INTO department SET ?",
+          {
+            name: answer.name,
+            
+          },
+          function (err) {
+            if (err) throw err;
+            
+            questions();
+          }
+        );
+      });
+  }
+
+  function createRole() {
+    // prompt for info about the item being put up for auction
+    inquirer
+      .prompt([
+        {
+          name: "title",
+          type: "input",
+          message: "What is the role name?",
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "What is the salary?",
+          },
+
+      ])
+      .then(function (answer) {
+        // when finished prompting, insert a new item into the db with that info
+        connection.query(
+          "INSERT INTO role SET ?",
+          {
+            title: answer.title,
+            salary: answer.salary,
+            
+          },
+          function (err) {
+            if (err) throw err;
+            
+            questions();
+          }
+        );
+      });
+  }
