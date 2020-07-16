@@ -204,7 +204,7 @@ function createDep() {
         },
         function (err) {
           if (err) throw err;
-
+          console.log(`You have created a department ${answer.name}.`)
           questions();
         }
       );
@@ -265,6 +265,8 @@ function createRole() {
             function (err) {
               if (err) throw err;
 
+              console.log(`You have created ${answer.title} with salary of ${answer.salary} in ${department_id}.`)
+
               questions();
             }
           );
@@ -317,6 +319,8 @@ function addEmployee() {
             },
             function (err) {
               if (err) throw err;
+
+              console.log(`You have created an employee ${answer.first_name} ${answer.last_name} with a role of ${role_id}.`)
 
               questions();
             }
