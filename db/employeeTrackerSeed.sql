@@ -1,3 +1,5 @@
+-- initial data for the database
+
 INSERT INTO department (name) VALUES ("IT"),("Marketing"),("HR");
 
 INSERT INTO role (title, salary, department_id)
@@ -10,5 +12,3 @@ VALUES ("Geek", "Nerd", 1),
 ("Famous", "Guy", 2),
 ("Strict", "Person", 3);
 
--- "insert into employee whec", {first_name: value} 
--- "insert into employee where ID = ?""
