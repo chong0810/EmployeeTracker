@@ -53,24 +53,24 @@ function questions() {
           viewAllRole();
           break;
 
-        case "Create Department":
+        case "Create a Department":
           createDep();
           break;
-        case "Create Role":
+        case "Create a Role":
           createRole();
           break;
-        case "Add Employee":
+        case "Add an Employee":
           addEmployee();
           break;
-        case "Delete Employee":
-          deleteEmployee();
-          break;
+        // case "Delete Employee":
+        //   deleteEmployee();
+        //   break;
         case "Update Employee Role":
           updateEmployee();
           break;
-        case "Update Employee Manager":
-          updateManager();
-          break;
+        // case "Update Employee Manager":
+        //   updateManager();
+        //   break;
 
         case "Exit":
           connection.end();
@@ -328,6 +328,7 @@ function addEmployee() {
 
 // update employee role
 function updateEmployee() {
+  
   connection.query(
     `SELECT employee.first_name, employee.last_name, role.salary, role.title, role.id, department.name as "Department Name"
     FROM employee_trackerDB.employee
@@ -350,25 +351,41 @@ function updateEmployee() {
               return choiceArray1;
             },
             message: "Which employee do you want to change?",
-          },
+          }
 
-          {
-            name: "roleChoice",
-            type: "list",
-            choices: function () {
-              var choiceArray2 = [];
-              for (var i = 0; i < res.length; i++) {
-                choiceArray2.push(res[i].title);
-              }
-              return choiceArray2;
-            },
-            message: "Which Role do you want to apply to the employee?",
-          },
+          
         ])
         .then(function (answer) {
-          console.log(answer);
 
-          // variables for update 
+          connection.query(
+            `SELECT role.title, role.id, role.salary
+            FROM employee_trackerDB.role`,
+
+            function(err,res4) {
+              if (err) throw err;
+
+              
+            inquirer.prompt([
+
+              {
+                name: "roleChoice",
+                type: "list",
+                choices: function () {
+                   var choiceArray2 =[];
+                    for (var i = 0; i < res4.length; i++) {
+                    choiceArray2.push(res4[i].title);
+                    }
+                  
+                  return choiceArray2;
+                },
+                message: "Which role do you want to apply to the employee?",
+              },
+
+            ]).then(function(answer2) {
+
+              console.log(answer);
+
+          // variables for update
           var role_id, employeeId;
 
           // searching and matching for name
@@ -395,8 +412,8 @@ function updateEmployee() {
                 function (err, res3) {
                   if (err) throw err;
 
-                  for (var i = 0; i < res2.length; i++) {
-                    if (`${res3[i].title}` === answer.roleChoice) {
+                  for (var i = 0; i < res3.length; i++) {
+                    if (`${res3[i].title}` === answer2.roleChoice) {
                       role_id = res3[i].id;
                     }
                   }
@@ -422,6 +439,21 @@ function updateEmployee() {
               );
             }
           );
+
+            }
+
+
+
+            );
+            }
+            
+          );
+
+
+
+
+
+          
         });
     }
   );
