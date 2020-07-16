@@ -328,7 +328,6 @@ function addEmployee() {
 
 // update employee role
 function updateEmployee() {
-  
   connection.query(
     `SELECT employee.first_name, employee.last_name, role.salary, role.title, role.id, department.name as "Department Name"
     FROM employee_trackerDB.employee
@@ -351,109 +350,92 @@ function updateEmployee() {
               return choiceArray1;
             },
             message: "Which employee do you want to change?",
-          }
-
-          
+          },
         ])
         .then(function (answer) {
-
           connection.query(
             `SELECT role.title, role.id, role.salary
             FROM employee_trackerDB.role`,
 
-            function(err,res4) {
+            function (err, res4) {
               if (err) throw err;
 
-              
-            inquirer.prompt([
+              inquirer
+                .prompt([
+                  {
+                    name: "roleChoice",
+                    type: "list",
+                    choices: function () {
+                      var choiceArray2 = [];
+                      for (var i = 0; i < res4.length; i++) {
+                        choiceArray2.push(res4[i].title);
+                      }
 
-              {
-                name: "roleChoice",
-                type: "list",
-                choices: function () {
-                   var choiceArray2 =[];
-                    for (var i = 0; i < res4.length; i++) {
-                    choiceArray2.push(res4[i].title);
-                    }
-                  
-                  return choiceArray2;
-                },
-                message: "Which role do you want to apply to the employee?",
-              },
+                      return choiceArray2;
+                    },
+                    message: "Which role do you want to apply to the employee?",
+                  },
+                ])
+                .then(function (answer2) {
+                  console.log(answer);
 
-            ]).then(function(answer2) {
+                  // variables for update
+                  var role_id, employeeId;
 
-              console.log(answer);
-
-          // variables for update
-          var role_id, employeeId;
-
-          // searching and matching for name
-          connection.query(
-            `SELECT employee.first_name, employee.last_name, employee.id
+                  // searching and matching for name
+                  connection.query(
+                    `SELECT employee.first_name, employee.last_name, employee.id
             FROM employee_trackerDB.employee`,
 
-            function (err, res2) {
-              if (err) throw err;
+                    function (err, res2) {
+                      if (err) throw err;
 
-              for (var i = 0; i < res2.length; i++) {
-                if (
-                  `${res2[i].first_name} ${res2[i].last_name}` ===
-                  answer.employeeChoice
-                ) {
-                  employeeId = res2[i].id;
-                }
-              }
-              // searching and matching for title
-              connection.query(
-                `SELECT role.title, role.salary, role.id
+                      for (var i = 0; i < res2.length; i++) {
+                        if (
+                          `${res2[i].first_name} ${res2[i].last_name}` ===
+                          answer.employeeChoice
+                        ) {
+                          employeeId = res2[i].id;
+                        }
+                      }
+                      // searching and matching for title
+                      connection.query(
+                        `SELECT role.title, role.salary, role.id
               FROM employee_trackerDB.role`,
 
-                function (err, res3) {
-                  if (err) throw err;
+                        function (err, res3) {
+                          if (err) throw err;
 
-                  for (var i = 0; i < res3.length; i++) {
-                    if (`${res3[i].title}` === answer2.roleChoice) {
-                      role_id = res3[i].id;
-                    }
-                  }
+                          for (var i = 0; i < res3.length; i++) {
+                            if (`${res3[i].title}` === answer2.roleChoice) {
+                              role_id = res3[i].id;
+                            }
+                          }
 
-                  connection.query(
-                    "UPDATE employee SET ? WHERE ?",
-                    [
-                      {
-                        role_id: role_id,
-                      },
+                          connection.query(
+                            "UPDATE employee SET ? WHERE ?",
+                            [
+                              {
+                                role_id: role_id,
+                              },
 
-                      {
-                        id: employeeId,
-                      },
-                    ],
-                    function (err) {
-                      if (err) throw err;
-                      console.log("Employee's role has been changed.");
-                      questions();
+                              {
+                                id: employeeId,
+                              },
+                            ],
+                            function (err) {
+                              if (err) throw err;
+                              console.log("Employee's role has been changed.");
+                              questions();
+                            }
+                          );
+                        }
+                      );
                     }
                   );
-                }
-              );
+                });
             }
           );
-
-            }
-
-
-
-            );
-            }
-            
-          );
-
-
-
-
-
-          
         });
     }
   );
